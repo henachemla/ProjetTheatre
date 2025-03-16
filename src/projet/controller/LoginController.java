@@ -1,8 +1,11 @@
 package projet.controller;
 
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import projet.database.DatabaseConnection;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,10 +17,12 @@ public class LoginController {
     private PasswordField passwordField, loginPasswordField;
     private Button inscrireButton, connecterButton;
     private Label messageLabel;
-    private OnLoginSuccessListener loginSuccessListener;
+    private Stage stage; // 🔥 Ajout du Stage pour gérer les scènes
 
-    public LoginController() {
-        // 📝 Section Inscription
+    public LoginController(Stage stage) {
+        this.stage = stage; // 🔥 Stocke le stage actuel
+        
+     // 📝 Section Inscription
         Label titreInscription = new Label("📝 Inscription");
         nomField = new TextField();
         nomField.setPromptText("Nom");
@@ -29,7 +34,9 @@ public class LoginController {
         passwordField.setPromptText("Mot de passe");
 
         inscrireButton = new Button("S'inscrire");
-        inscrireButton.setOnAction(e -> inscrireUtilisateur());
+        inscrireButton.setOnAction(e -> handleRegister());
+
+
 
         // 🔐 Section Connexion
         Label titreConnexion = new Label("🔐 Connexion");
@@ -40,18 +47,18 @@ public class LoginController {
         loginPasswordField.setPromptText("Mot de passe");
 
         connecterButton = new Button("Se connecter");
-        connecterButton.setOnAction(e -> connecterUtilisateur());
+        connecterButton.setOnAction(e -> handleLogin()); // 🔥 Lié directement à handleLogin()
 
         messageLabel = new Label();
 
         // 📌 Organisation de l'affichage
         view = new VBox(10, titreInscription, nomField, emailField, passwordField, inscrireButton, 
-                        titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLabel);
+titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLabel);
         view.setStyle("-fx-padding: 20px; -fx-alignment: center;");
     }
-
-    // ✅ Inscription
-    private void inscrireUtilisateur() {
+    
+ // ✅ Méthode pour l'inscription d'un utilisateur
+    private void handleRegister() {
         String nom = nomField.getText();
         String email = emailField.getText();
         String motDePasse = passwordField.getText();
@@ -61,7 +68,8 @@ public class LoginController {
             return;
         }
 
-        String sql = "INSERT INTO utilisateurs (nom, email, mot_de_passe, forfait_restants) VALUES (?, ?, ?, 10)";
+        // 🔥 Ajout du champ "role" par défaut en "user"
+        String sql = "INSERT INTO utilisateurs (nom, email, mot_de_passe, role, forfait_restants) VALUES (?, ?, ?, 'user', 10)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -80,8 +88,8 @@ public class LoginController {
         }
     }
 
-    // ✅ Connexion
-    private void connecterUtilisateur() {
+    //methode pour la connexion d'un utilisateur
+    private void handleLogin() {
         String email = loginEmailField.getText();
         String motDePasse = loginPasswordField.getText();
 
@@ -90,7 +98,7 @@ public class LoginController {
             return;
         }
 
-        String sql = "SELECT id FROM utilisateurs WHERE email = ? AND mot_de_passe = ?";
+        String sql = "SELECT id, role FROM utilisateurs WHERE email = ? AND mot_de_passe = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -101,30 +109,39 @@ public class LoginController {
 
             if (rs.next()) {
                 int utilisateurId = rs.getInt("id");
+                String role = rs.getString("role");  // Récupération du rôle
+
                 messageLabel.setText("✅ Connexion réussie !");
-                if (loginSuccessListener != null) {
-                    loginSuccessListener.onLoginSuccess(utilisateurId);
+                
+                // 🔥 Redirection immédiate selon le rôle
+                if (role.equals("admin")) {
+                    afficherInterfaceAdmin();
+                } else {
+                    afficherInterfaceUtilisateur(utilisateurId);
                 }
             } else {
                 messageLabel.setText("❌ Email ou mot de passe incorrect !");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
             messageLabel.setText("❌ Erreur lors de la connexion !");
         }
+    }
+
+    // ✅ Afficher l'interface administrateur
+    private void afficherInterfaceAdmin() {
+        AdminInterfaceController adminInterface = new AdminInterfaceController();
+        adminInterface.start(stage); // 🔥 Utilisation du stage actuel
+    }
+
+    // ✅ Afficher l'interface utilisateur
+    private void afficherInterfaceUtilisateur(int utilisateurId) {
+        ReservationController reservationController = new ReservationController(utilisateurId);
+        Scene reservationScene = new Scene(reservationController.getView(), 900, 600);
+        stage.setScene(reservationScene); // 🔥 Changement de la scène directement
     }
 
     public VBox getView() {
         return view;
     }
-
-    // Interface pour déclencher un événement après la connexion
-    public interface OnLoginSuccessListener {
-        void onLoginSuccess(int utilisateurId);
-    }
-
-    public void setOnLoginSuccess(OnLoginSuccessListener listener) {
-        this.loginSuccessListener = listener;
-    }
 }
-

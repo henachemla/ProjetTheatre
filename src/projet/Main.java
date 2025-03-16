@@ -4,25 +4,23 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import projet.controller.LoginController;
-import projet.controller.ReservationController;
+import projet.view.AccueilView;
 
 public class Main extends Application {
+    private BorderPane root;
+    private AccueilView accueil;
+
     @Override
-    public void start(Stage stage) {
-        LoginController loginController = new LoginController();
-        BorderPane root = new BorderPane(loginController.getView());
-
-        Scene scene = new Scene(root, 500, 500);
-        stage.setTitle("Application Théâtre");
-        stage.setScene(scene);
-        stage.show();
-
-        // Après connexion, afficher l'écran de réservation
-        loginController.setOnLoginSuccess(utilisateurId -> {
-            ReservationController reservationController = new ReservationController(utilisateurId);
-            root.setCenter(reservationController.getView());
-        });
+    public void start(Stage primaryStage) {
+        root = new BorderPane();
+        accueil = new AccueilView(primaryStage); // ✅ Passer le stage pour changer les scènes
+        root.setCenter(accueil.getView());
+        
+        
+        Scene scene = new Scene(root, 900, 600);
+        primaryStage.setTitle("Application Théâtre");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     public static void main(String[] args) {
