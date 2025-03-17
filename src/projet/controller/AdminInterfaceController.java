@@ -18,6 +18,7 @@ public class AdminInterfaceController {
             adminStage.close();
             System.out.println("Déconnexion effectuée !");
         });
+        
 
         VBox layout = new VBox(10, welcomeLabel, manageUsersButton, logoutButton);
         layout.setStyle("-fx-padding: 20px; -fx-alignment: center;");

@@ -2,9 +2,11 @@ package projet.controller;
 
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import projet.database.DatabaseConnection;
+import projet.view.AccueilView;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,6 +18,7 @@ public class LoginController {
     private TextField nomField, emailField, loginEmailField;
     private PasswordField passwordField, loginPasswordField;
     private Button inscrireButton, connecterButton;
+    
     private Label messageLabel;
     private Stage stage; // 🔥 Ajout du Stage pour gérer les scènes
 
@@ -128,11 +131,12 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
         }
     }
 
-    // ✅ Afficher l'interface administrateur
+ // ✅ Afficher l'interface administrateur après connexion
     private void afficherInterfaceAdmin() {
         AdminInterfaceController adminInterface = new AdminInterfaceController();
-        adminInterface.start(stage); // 🔥 Utilisation du stage actuel
+        adminInterface.start(stage);
     }
+
 
     // ✅ Afficher l'interface utilisateur
     private void afficherInterfaceUtilisateur(int utilisateurId) {
@@ -140,6 +144,7 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
         Scene reservationScene = new Scene(reservationController.getView(), 900, 600);
         stage.setScene(reservationScene); // 🔥 Changement de la scène directement
     }
+    
 
     public VBox getView() {
         return view;
