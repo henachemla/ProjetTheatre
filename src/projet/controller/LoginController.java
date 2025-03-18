@@ -3,10 +3,12 @@ package projet.controller;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import projet.database.DatabaseConnection;
 import projet.view.AccueilView;
+import projet.view.navbar;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,15 +17,17 @@ import java.sql.SQLException;
 
 public class LoginController {
     private VBox view;
+    private BorderPane root;
     private TextField nomField, emailField, loginEmailField;
     private PasswordField passwordField, loginPasswordField;
     private Button inscrireButton, connecterButton;
-    
+    private int utilisateurId;
     private Label messageLabel;
-    private Stage stage; // 🔥 Ajout du Stage pour gérer les scènes
+    private Stage primaryStage; // 🔥 Ajout du Stage pour gérer les scènes
 
-    public LoginController(Stage stage) {
-        this.stage = stage; // 🔥 Stocke le stage actuel
+    public LoginController(Stage primaryStage) {
+        this.primaryStage = primaryStage; // 🔥 Stocke le stage actuel
+       
         
      // 📝 Section Inscription
         Label titreInscription = new Label("📝 Inscription");
@@ -58,6 +62,14 @@ public class LoginController {
         view = new VBox(10, titreInscription, nomField, emailField, passwordField, inscrireButton, 
 titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLabel);
         view.setStyle("-fx-padding: 20px; -fx-alignment: center;");
+        
+     // ✅ Ajout de la NavBar
+        root = new BorderPane();
+
+        // ✅ Ajout de la NavBar avec "Connexion" comme onglet actif
+        root.setTop(navbar.createNavBar(primaryStage, "Connexion", utilisateurId));
+
+        root.setCenter(view);
     }
     
  // ✅ Méthode pour l'inscription d'un utilisateur
@@ -133,20 +145,20 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
 
  // ✅ Afficher l'interface administrateur après connexion
     private void afficherInterfaceAdmin() {
-        AdminInterfaceController adminInterface = new AdminInterfaceController();
-        adminInterface.start(stage);
+        AdminInterfaceController adminInterface = new AdminInterfaceController(root, primaryStage);
+        root.setCenter(adminInterface.getView());    
     }
 
 
     // ✅ Afficher l'interface utilisateur
     private void afficherInterfaceUtilisateur(int utilisateurId) {
-        ReservationController reservationController = new ReservationController(utilisateurId);
-        Scene reservationScene = new Scene(reservationController.getView(), 900, 600);
-        stage.setScene(reservationScene); // 🔥 Changement de la scène directement
+    	AccueilView accueilView = new AccueilView(primaryStage);
+        Scene accueilScene = new Scene(accueilView.getView(), 900, 600);
+        primaryStage.setScene(accueilScene);
     }
     
 
-    public VBox getView() {
-        return view;
+    public BorderPane getView() {
+        return root;
     }
 }

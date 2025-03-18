@@ -1,101 +1,58 @@
 package projet.controller;
 
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import projet.database.DatabaseConnection;
+import projet.model.Cours;
+import projet.view.navbar;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.List;
 
 public class ReservationController {
+	private BorderPane root;
     private VBox view;
     private ComboBox<String> coursComboBox;
     private Button reserverButton;
     private ListView<String> reservationsList;
     private Label messageLabel;
     private int utilisateurId;
+    private Stage primaryStage;
 
-    public ReservationController(int utilisateurId) {
+    public ReservationController(Stage primaryStage,int utilisateurId) {
         this.utilisateurId = utilisateurId;
+        this.primaryStage = primaryStage;
 
         // Interface réservation
-        Label titre = new Label("📌 Réserver un cours");
-        coursComboBox = new ComboBox<>();
-        chargerCoursDisponibles();
-
-        reserverButton = new Button("Réserver");
-        reserverButton.setOnAction(e -> reserverCours());
+        
 
         messageLabel = new Label();
 
         // Interface affichage des réservations
         Label titreReservations = new Label("📅 Mes Réservations");
+        titreReservations.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         reservationsList = new ListView<>();
         chargerReservations();
 
         // Organisation de l'affichage
-        view = new VBox(10, titre, coursComboBox, reserverButton, messageLabel, titreReservations, reservationsList);
+        view = new VBox(10, messageLabel, titreReservations, reservationsList);
         view.setStyle("-fx-padding: 20px; -fx-alignment: center;");
+        
+        root = new BorderPane();
+        root.setTop(navbar.createNavBar(primaryStage, "Mes Réservations", utilisateurId));
+        root.setCenter(view);
+
     }
 
-    // 📌 Charger les cours disponibles
-    private void chargerCoursDisponibles() {
-        String sql = "SELECT nom FROM cours WHERE places_disponibles > 0";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                coursComboBox.getItems().add(rs.getString("nom"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // 📌 Réserver un cours
-    private void reserverCours() {
-        String coursChoisi = coursComboBox.getValue();
-
-        if (coursChoisi == null) {
-            messageLabel.setText("❌ Sélectionnez un cours !");
-            return;
-        }
-
-        String sqlGetCours = "SELECT id FROM cours WHERE nom = ?";
-        String sqlReservation = "INSERT INTO reservations (utilisateur_id, cours_id, date) VALUES (?, ?, NOW())";
-        String sqlUpdatePlaces = "UPDATE cours SET places_disponibles = places_disponibles - 1 WHERE id = ?";
-        String sqlUpdateForfait = "UPDATE utilisateurs SET forfait_restants = forfait_restants - 1 WHERE id = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmtGetCours = conn.prepareStatement(sqlGetCours);
-             PreparedStatement stmtReservation = conn.prepareStatement(sqlReservation);
-             PreparedStatement stmtUpdatePlaces = conn.prepareStatement(sqlUpdatePlaces);
-             PreparedStatement stmtUpdateForfait = conn.prepareStatement(sqlUpdateForfait)) {
-
-            stmtGetCours.setString(1, coursChoisi);
-            ResultSet rs = stmtGetCours.executeQuery();
-
-            if (rs.next()) {
-                int coursId = rs.getInt("id");
-
-                stmtReservation.setInt(1, utilisateurId);
-                stmtReservation.setInt(2, coursId);
-                stmtReservation.executeUpdate();
-
-                stmtUpdatePlaces.setInt(1, coursId);
-                stmtUpdatePlaces.executeUpdate();
-
-                stmtUpdateForfait.setInt(1, utilisateurId);
-                stmtUpdateForfait.executeUpdate();
-
-                messageLabel.setText("✅ Réservation confirmée !");
-                chargerReservations(); // Mise à jour de la liste des réservations
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            messageLabel.setText("❌ Erreur lors de la réservation !");
+    
+    
+    public void ajouterReservations(List<Cours> coursSelectionnes) {
+        for (Cours cours : coursSelectionnes) {
+            reservationsList.getItems().add("📌 " + cours.nomProperty().get() + " - " + cours.prixProperty().get());
         }
     }
 
@@ -117,7 +74,7 @@ public class ReservationController {
         }
     }
 
-    public VBox getView() {
-        return view;
+    public BorderPane getView() {
+        return root;
     }
 }
