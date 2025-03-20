@@ -21,9 +21,10 @@ public class LoginController {
     private TextField nomField, emailField, loginEmailField;
     private PasswordField passwordField, loginPasswordField;
     private Button inscrireButton, connecterButton;
-    private int utilisateurId;
     private Label messageLabel;
-    private Stage primaryStage; // 🔥 Ajout du Stage pour gérer les scènes
+    private Stage primaryStage;// 🔥 Ajout du Stage pour gérer les scènes
+    private int utilisateurId; // ✅ -1 signifie "non connecté"
+
 
     public LoginController(Stage primaryStage) {
         this.primaryStage = primaryStage; // 🔥 Stocke le stage actuel
@@ -57,7 +58,14 @@ public class LoginController {
         connecterButton.setOnAction(e -> handleLogin()); // 🔥 Lié directement à handleLogin()
 
         messageLabel = new Label();
-
+        
+     // ✅ Bouton Déconnexion
+        if (utilisateurId != -1) {
+        Button deconnexionButton = new Button("Déconnexion");
+        deconnexionButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+        deconnexionButton.setOnAction(e -> handleLogout());
+        }
+        
         // 📌 Organisation de l'affichage
         view = new VBox(10, titreInscription, nomField, emailField, passwordField, inscrireButton, 
 titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLabel);
@@ -71,6 +79,13 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
 
         root.setCenter(view);
     }
+    
+    private void handleLogout() {
+        utilisateurId = -1; // ✅ Déconnecte l'utilisateur
+        primaryStage.getScene().setRoot(new LoginController(primaryStage).getView()); // 🔥 Retour à la page de connexion
+        System.out.println("❌ Déconnexion réussie !");
+    }
+
     
  // ✅ Méthode pour l'inscription d'un utilisateur
     private void handleRegister() {

@@ -15,7 +15,7 @@ public class AdminInterfaceController {
 	public AdminInterfaceController(BorderPane root, Stage primaryStage) {
 		this.root = root;
 		
-        Label welcomeLabel = new Label("👨‍💼 Bienvenue, Administrateur !");
+        Label welcomeLabel = new Label("👨‍💼 Bienvenue, Matthieu !");
         Button manageUsersButton = new Button("👥 Gérer les utilisateurs");
         Button logoutButton = new Button("🚪 Déconnexion");
 

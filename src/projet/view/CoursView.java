@@ -23,6 +23,8 @@ public class CoursView {
     private ObservableList<Cours> coursList;
     private Button validerReservationsButton;
     private int utilisateurId;
+    private Label erreurLabel;
+
 
     public CoursView(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -43,9 +45,13 @@ public class CoursView {
         validerReservationsButton = new Button("Valider mes réservations");
         validerReservationsButton.setDisable(true);
         validerReservationsButton.setOnAction(e -> {
+        	if (utilisateurId == -1) {  // ✅ Vérifie si l'utilisateur est connecté
+                erreurLabel.setText("❌ Vous devez être connecté pour réserver un cours !");
+                return;
+            }
             List<Cours> selectionnes = getCoursSelectionnes(); // ✅ Récupère les cours sélectionnés
             System.out.println("🔥 Cours sélectionnés : " + selectionnes.size()); // ✅ Debug
-
+            
             if (!selectionnes.isEmpty()) {
                 validerReservations(selectionnes);
             } else {
@@ -59,8 +65,12 @@ public class CoursView {
         tableCours.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             validerReservationsButton.setDisable(tableCours.getSelectionModel().getSelectedItems().isEmpty());
         });
+        
+        erreurLabel = new Label();
+        erreurLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
 
-        VBox content = new VBox(10, titre, tableCours, validerReservationsButton);
+
+        VBox content = new VBox(10, titre, tableCours, validerReservationsButton,erreurLabel);
         content.setAlignment(Pos.CENTER);
         content.setPadding(new Insets(20));
 
