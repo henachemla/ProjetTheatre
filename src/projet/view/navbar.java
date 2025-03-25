@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import projet.controller.LoginController;
 import projet.controller.ReservationController;
+import projet.model.Utilisateur;
 
 public class navbar {
 
@@ -21,11 +22,7 @@ public class navbar {
         Button btnCours = createNavButton("Cours", activeTab, primaryStage);
         Button btnReservations = createNavButton("Mes Réservations", activeTab, primaryStage);
         Button btnAPropos = createNavButton("À propos", activeTab, primaryStage);
-        Button btnContact = createNavButton("Contact", activeTab, primaryStage);
-        Button btnConnexion = new Button("👤");
 
-        btnConnexion.setStyle("-fx-font-size: 16px; -fx-background-color: transparent; -fx-text-fill: black;");
-        btnContact.setStyle("-fx-font-size: 14px; -fx-background-color: #4c70ba; -fx-text-fill: white; -fx-padding: 5px 10px; -fx-border-radius: 5px;");
         
      // 📌 Navigation entre les pages
         btnAccueil.setOnAction(e -> {
@@ -44,24 +41,40 @@ public class navbar {
             primaryStage.getScene().setRoot(reservationController.getView());
         });
         
-        btnConnexion.setOnAction(e -> {
-            LoginController loginController = new LoginController(primaryStage);
-            Scene loginScene = new Scene(loginController.getView(), 900, 600);
-            primaryStage.setScene(loginScene);
-        });
 
         // 📌 Section gauche (Onglets)
         HBox leftSection = new HBox(10, btnAccueil, btnCours, btnReservations, btnAPropos);
         leftSection.setAlignment(Pos.CENTER);
         leftSection.setPadding(new Insets(0, 20, 0, 0));
+        navbar.setLeft(leftSection);
 
         // 📌 Section droite (Contact + Connexion)
-        HBox rightSection = new HBox(10, btnContact, btnConnexion);
+        HBox rightSection = new HBox(10);
         rightSection.setAlignment(Pos.CENTER);
         rightSection.setPadding(new Insets(0, 20, 0, 0));
+        
+        Button btnContact = createNavButton("Contact", activeTab, primaryStage);
+        btnContact.setStyle("-fx-font-size: 14px; -fx-background-color: #4c70ba; -fx-text-fill: white; -fx-padding: 5px 10px; -fx-border-radius: 5px;");
 
-        // 📌 Placement dans le BorderPane
-        navbar.setLeft(leftSection);
+        
+        if (Utilisateur.estConnecte()) {
+            Button btnDeconnexion = new Button("Déconnexion");
+            btnDeconnexion.setStyle("-fx-font-size: 14px; -fx-background-color: red; -fx-text-fill: white; -fx-padding: 5px 10px; -fx-border-radius: 5px;");
+            btnDeconnexion.setOnAction(e -> {
+                Utilisateur.deconnecter();
+                primaryStage.setScene(new Scene(new LoginController(primaryStage).getView(), 900, 600));
+            });
+            rightSection.getChildren().addAll(btnContact, btnDeconnexion);
+        } else {
+            Button btnConnexion = new Button("👤");
+            btnConnexion.setStyle("-fx-font-size: 16px; -fx-background-color: transparent; -fx-text-fill: black;");
+            btnConnexion.setOnAction(e -> {
+                primaryStage.setScene(new Scene(new LoginController(primaryStage).getView(), 900, 600));
+            });
+            rightSection.getChildren().addAll(btnContact, btnConnexion);
+        }
+
+        
         navbar.setRight(rightSection);
 
         return navbar;

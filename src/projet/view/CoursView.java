@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import projet.view.navbar;
 import projet.controller.ReservationController;
 import projet.model.Cours;
+import projet.model.Utilisateur;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +46,10 @@ public class CoursView {
         validerReservationsButton = new Button("Valider mes réservations");
         validerReservationsButton.setDisable(true);
         validerReservationsButton.setOnAction(e -> {
-        	if (utilisateurId == -1) {  // ✅ Vérifie si l'utilisateur est connecté
-                erreurLabel.setText("❌ Vous devez être connecté pour réserver un cours !");
-                return;
-            }
+        	if (!Utilisateur.estConnecte()) {
+        	    erreurLabel.setText("❌ Vous devez être connecté pour réserver un cours !");
+        	    return;
+        	}
             List<Cours> selectionnes = getCoursSelectionnes(); // ✅ Récupère les cours sélectionnés
             System.out.println("🔥 Cours sélectionnés : " + selectionnes.size()); // ✅ Debug
             
@@ -169,7 +170,7 @@ public class CoursView {
             System.out.println("✅ Cours réservés : " + coursSelectionnes);
 
             // 🔥 Redirection vers la page "Mes Réservations" avec les cours sélectionnés
-            ReservationController reservationController = new ReservationController(primaryStage, utilisateurId);
+            ReservationController reservationController = new ReservationController(primaryStage,  Utilisateur.getUtilisateurId());
             reservationController.ajouterReservations(coursSelectionnes);
             primaryStage.getScene().setRoot(reservationController.getView());
         } else {

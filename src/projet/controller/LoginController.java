@@ -7,6 +7,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import projet.database.DatabaseConnection;
+import projet.model.Utilisateur;
 import projet.view.AccueilView;
 import projet.view.navbar;
 
@@ -81,8 +82,8 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
     }
     
     private void handleLogout() {
-        utilisateurId = -1; // ✅ Déconnecte l'utilisateur
-        primaryStage.getScene().setRoot(new LoginController(primaryStage).getView()); // 🔥 Retour à la page de connexion
+    	Utilisateur.deconnecter();
+    	primaryStage.getScene().setRoot(new LoginController(primaryStage).getView());
         System.out.println("❌ Déconnexion réussie !");
     }
 
@@ -138,7 +139,7 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                int utilisateurId = rs.getInt("id");
+            	Utilisateur.setUtilisateurId(rs.getInt("id"));
                 String role = rs.getString("role");  // Récupération du rôle
 
                 messageLabel.setText("✅ Connexion réussie !");
