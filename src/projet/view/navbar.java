@@ -104,8 +104,8 @@ public class navbar {
                     // Ajouter ici la redirection pour "Cours" si nécessaire
                     break;
                 case "À propos":
-                    // Ajouter ici la redirection pour "À propos"
-                    break;
+                	primaryStage.getScene().setRoot(new aPropos(primaryStage).getView());                	
+                	break;
             }
         });
 
