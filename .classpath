@@ -7,14 +7,14 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/benja/OneDrive/Bureau/javafx-sdk-17.0.14/lib/javafx.base.jar"/>
-	<classpathentry kind="lib" path="C:/Users/benja/OneDrive/Bureau/javafx-sdk-17.0.14/lib/javafx.controls.jar"/>
-	<classpathentry kind="lib" path="C:/Users/benja/OneDrive/Bureau/javafx-sdk-17.0.14/lib/javafx.fxml.jar"/>
-	<classpathentry kind="lib" path="C:/Users/benja/OneDrive/Bureau/javafx-sdk-17.0.14/lib/javafx.graphics.jar"/>
-	<classpathentry kind="lib" path="C:/Users/benja/OneDrive/Bureau/javafx-sdk-17.0.14/lib/javafx.media.jar"/>
-	<classpathentry kind="lib" path="C:/Users/benja/OneDrive/Bureau/javafx-sdk-17.0.14/lib/javafx.swing.jar"/>
-	<classpathentry kind="lib" path="C:/Users/benja/OneDrive/Bureau/javafx-sdk-17.0.14/lib/javafx.web.jar"/>
-	<classpathentry kind="lib" path="C:/Users/benja/OneDrive/Bureau/javafx-sdk-17.0.14/lib/javafx-swt.jar"/>
-	<classpathentry kind="lib" path="C:/Users/benja/OneDrive/Bureau/mysql-connector-j-8.0.33/mysql-connector-j-8.0.33.jar"/>
+	<classpathentry kind="lib" path="C:/Users/henac/Desktop/javafx-sdk-17.0.14/lib/javafx.base.jar"/>
+	<classpathentry kind="lib" path="C:/Users/henac/Desktop/javafx-sdk-17.0.14/lib/javafx.controls.jar"/>
+	<classpathentry kind="lib" path="C:/Users/henac/Desktop/javafx-sdk-17.0.14/lib/javafx.fxml.jar"/>
+	<classpathentry kind="lib" path="C:/Users/henac/Desktop/javafx-sdk-17.0.14/lib/javafx.graphics.jar"/>
+	<classpathentry kind="lib" path="C:/Users/henac/Desktop/javafx-sdk-17.0.14/lib/javafx.media.jar"/>
+	<classpathentry kind="lib" path="C:/Users/henac/Desktop/javafx-sdk-17.0.14/lib/javafx.swing.jar"/>
+	<classpathentry kind="lib" path="C:/Users/henac/Desktop/javafx-sdk-17.0.14/lib/javafx.web.jar"/>
+	<classpathentry kind="lib" path="C:/Users/henac/Desktop/javafx-sdk-17.0.14/lib/javafx-swt.jar"/>
+	<classpathentry kind="lib" path="C:/Users/henac/Desktop/mysql-connector-j-8.0.33/mysql-connector-j-8.0.33.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -59,7 +59,7 @@ public class ReservationController {
     // 📌 Charger les réservations de l'utilisateur
     private void chargerReservations() {
         reservationsList.getItems().clear();
-        String sql = "SELECT c.nom, r.date FROM reservations r JOIN cours c ON r.cours_id = c.id WHERE r.utilisateur_id = ?";
+        String sql = "SELECT c.nom, r.date FROM reservations r JOIN cours c ON r.cours_id = c.cours_id WHERE r.utilisateur_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

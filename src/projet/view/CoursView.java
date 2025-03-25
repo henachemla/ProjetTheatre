@@ -11,9 +11,12 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import projet.view.navbar;
 import projet.controller.ReservationController;
+import projet.database.DatabaseConnection;
 import projet.model.Cours;
 import projet.model.Utilisateur;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,21 +48,7 @@ public class CoursView {
         // 📌 Bouton de validation
         validerReservationsButton = new Button("Valider mes réservations");
         validerReservationsButton.setDisable(true);
-        validerReservationsButton.setOnAction(e -> {
-        	if (!Utilisateur.estConnecte()) {
-        	    erreurLabel.setText("❌ Vous devez être connecté pour réserver un cours !");
-        	    return;
-        	}
-            List<Cours> selectionnes = getCoursSelectionnes(); // ✅ Récupère les cours sélectionnés
-            System.out.println("🔥 Cours sélectionnés : " + selectionnes.size()); // ✅ Debug
-            
-            if (!selectionnes.isEmpty()) {
-                validerReservations(selectionnes);
-            } else {
-                System.out.println("❌ Aucun cours sélectionné !");
-            }
-            
-        });
+        validerReservationsButton.setOnAction(e ->validerReservations(getCoursSelectionnes()));
 
         // 📌 Sélectionner/désélectionner des cours
         tableCours.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -131,10 +120,15 @@ public class CoursView {
 
         // 📌 Ajout des cours (exemple)
         coursList = FXCollections.observableArrayList(
-                new Cours("Théâtre Classique", "Découverte des classiques", "15-25 ans", "30€"),
-                new Cours("Improvisation", "Ateliers de scène libre", "16-30 ans", "25€"),
-                new Cours("Expression Scénique", "Travail sur l'émotion", "18+ ans", "35€"),
-                new Cours("Mise en Scène", "Création d'une pièce", "20+ ans", "40€")
+                new Cours(1, "Théâtre Classique", "Découverte des classiques - 1h - Lundi", 10, "15-25 ans", "30€"),
+                new Cours(2,"Improvisation", "Ateliers de scène libre - 1h30 - Mardi", 10, "16-30 ans", "30€"),
+                new Cours(3,"Expression Scénique", "Travail sur l'émotion - 2h - Mercredi", 10, "18+ ans", "40€"),
+                new Cours(4,"Mise en Scène", "Création d'une pièce - 2h30 - Jeudi", 10, "20+ ans", "50€"),
+                new Cours(5,"Jeu corporel", "Expression par le corps - 1h - Vendredi", 10, "15-20 ans", "20€"),
+                new Cours(6,"Lecture à voix haute", "Interprétation de textes - 1h30 - Samedi", 10, "16-25 ans", "30€"),
+                new Cours(7,"Impro musicale", "Improvisation avec instruments - 2h - Dimanche", 10, "16-30 ans", "40€")
+
+
         );
 
         tableCours.setItems(coursList);
@@ -166,17 +160,40 @@ public class CoursView {
     }
 
     private void validerReservations(List<Cours> coursSelectionnes) {
-        if (!coursSelectionnes.isEmpty()) {
+    	if (!coursSelectionnes.isEmpty()) {
             System.out.println("✅ Cours réservés : " + coursSelectionnes);
 
-            // 🔥 Redirection vers la page "Mes Réservations" avec les cours sélectionnés
-            ReservationController reservationController = new ReservationController(primaryStage,  Utilisateur.getUtilisateurId());
-            reservationController.ajouterReservations(coursSelectionnes);
+            try (Connection conn = DatabaseConnection.getConnection()) {
+                for (Cours cours : coursSelectionnes) {
+                	// 1. Insertion de la réservation
+                    String sql = "INSERT INTO reservations (utilisateur_id, cours_id, date) VALUES (?, ?, NOW())";
+                    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                        stmt.setInt(1, Utilisateur.getUtilisateurId());
+                        stmt.setInt(2, cours.getCoursId()); // ⚠️ Nécessite un champ id dans Cours
+                        stmt.executeUpdate();
+                    }
+                    
+                 // 2. Décrémentation des places disponibles
+                    String updateSql = "UPDATE cours SET places_dispo = places_dispo - 1 WHERE cours_id = ?";
+                    try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                        updateStmt.setInt(1, cours.getCoursId());
+                        updateStmt.executeUpdate();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // 🔥 Redirection vers "Mes Réservations"
+            ReservationController reservationController = new ReservationController(primaryStage, Utilisateur.getUtilisateurId());
             primaryStage.getScene().setRoot(reservationController.getView());
         } else {
             System.out.println("❌ Aucun cours sélectionné !");
         }
     }
+    
+    
+
 
 
 
