@@ -15,6 +15,7 @@ public class navbar {
 
     public static BorderPane createNavBar(Stage primaryStage, String activeTab, int utilisateurId) {
         BorderPane navbar = new BorderPane();
+        navbar.setStyle("-fx-background-color: #ffffff;"); // ou #fffdf9
         navbar.getStyleClass().add("navbar");
 
         // 📌 Boutons de la navigation
