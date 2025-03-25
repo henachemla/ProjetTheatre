@@ -160,6 +160,10 @@ public class CoursView {
     }
 
     private void validerReservations(List<Cours> coursSelectionnes) {
+    	if (!Utilisateur.estConnecte()) {
+            erreurLabel.setText("❌ Veuillez vous connecter pour réserver un cours.");
+            return; // ❌ Stoppe l'exécution ici si non connecté
+        }
     	if (!coursSelectionnes.isEmpty()) {
             System.out.println("✅ Cours réservés : " + coursSelectionnes);
 

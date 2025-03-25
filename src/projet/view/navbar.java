@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import projet.controller.LoginController;
 import projet.controller.ReservationController;
+import projet.model.Cours;
 import projet.model.Utilisateur;
 
 public class navbar {
@@ -99,11 +100,11 @@ public class navbar {
                     primaryStage.getScene().setRoot(new AccueilView(primaryStage).getView());
                     break;
                 case "Mes Réservations":
-                    primaryStage.getScene().setRoot(new ReservationController(primaryStage, 1).getView()); // Remplace 1 par l'ID utilisateur actuel
+                    primaryStage.getScene().setRoot(new ReservationController(primaryStage, Utilisateur.getUtilisateurId()).getView()); // Remplace 1 par l'ID utilisateur actuel
                     break;
                 case "Cours":
-                    // Ajouter ici la redirection pour "Cours" si nécessaire
-                    break;
+                	primaryStage.getScene().setRoot(new CoursView(primaryStage).getView());                	
+                	break;
                 case "À propos":
                 	primaryStage.getScene().setRoot(new aPropos(primaryStage).getView());                	
                 	break;
