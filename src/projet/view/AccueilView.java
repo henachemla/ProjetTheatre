@@ -22,13 +22,11 @@ public class AccueilView {
         root = new BorderPane();
         root.setTop(navbar.createNavBar(primaryStage, "Accueil", -1));
 
-        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #f9f4ed 0%, #e8e0d1 100%);");
 
         VBox mainContent = new VBox(40);
         mainContent.setAlignment(Pos.CENTER);
         mainContent.setPadding(new Insets(50, 20, 80, 20));
 
-        ImageView headerImage = createHeaderImage();
 
         VBox textBox = createTextBox();
 
@@ -36,7 +34,17 @@ public class AccueilView {
 
         HBox features = createFeaturesSection();
 
-        mainContent.getChildren().addAll(headerImage, textBox, ctaButton, features);
+        mainContent.getChildren().addAll( textBox, ctaButton, features);
+        
+     // 📸 Appliquer l'image de fond au BorderPane
+        BackgroundImage backgroundImage = new BackgroundImage(
+            new Image(getClass().getResource("/images/jamais.jpg").toExternalForm(), 900, 600, false, true),
+            BackgroundRepeat.NO_REPEAT,
+            BackgroundRepeat.NO_REPEAT,
+            BackgroundPosition.CENTER,
+            new BackgroundSize(100, 100, true, true, false, true)
+        );
+        root.setBackground(new Background(backgroundImage));
 
         StackPane contentContainer = new StackPane(mainContent);
         contentContainer.setPadding(new Insets(20));
