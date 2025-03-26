@@ -2,73 +2,133 @@ package projet.view;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 public class AccueilView {
-
     private BorderPane root;
     private Stage primaryStage;
-    private int utilisateurId;
 
     public AccueilView(Stage primaryStage) {
         this.primaryStage = primaryStage;
 
-        // ✅ Layout principal avec fond beige
         root = new BorderPane();
-        root.setTop(navbar.createNavBar(primaryStage, "Accueil", utilisateurId));
-        root.setStyle("-fx-background-color: #f9f4ed;");
-        
+        root.setTop(navbar.createNavBar(primaryStage, "Accueil", -1));
 
-        // 🎭 Contenu centré
-        VBox content = new VBox(30);
-        content.setPadding(new Insets(60, 20, 60, 20));
-        content.setAlignment(Pos.TOP_CENTER);
-        content.setStyle("-fx-background-color: rgba(255,255,255,0.6);");
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #f9f4ed 0%, #e8e0d1 100%);");
 
-        // ✨ Titre
-        Label titre = new Label("Bienvenue sur notre plateforme de cours de théâtre !");
-        titre.setFont(Font.font("Palatino Linotype", FontWeight.BOLD, 24));
-        titre.setTextFill(Color.web("#6a0f1c"));
-        titre.setWrapText(true);
-        titre.setMaxWidth(600);
-        titre.setAlignment(Pos.CENTER);
+        VBox mainContent = new VBox(40);
+        mainContent.setAlignment(Pos.CENTER);
+        mainContent.setPadding(new Insets(50, 20, 80, 20));
 
-        // 📝 Sous-titre
-        Label sousTitre = new Label("Réservez vos cours en toute simplicité.");
-        sousTitre.setFont(Font.font("Georgia", FontPosture.REGULAR, 16));
-        sousTitre.setTextFill(Color.web("#2e2e2e"));
-        sousTitre.setWrapText(true);
-        sousTitre.setMaxWidth(600);
-        sousTitre.setAlignment(Pos.CENTER);
+        ImageView headerImage = createHeaderImage();
 
-        // 🧱 Boîte stylisée
-        VBox box = new VBox(10, titre, sousTitre);
-        box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(30));
-        box.setStyle(
-            "-fx-background-color: #fefcf7;" +
-            "-fx-border-color: #e0d4c3;" +
-            "-fx-border-width: 1;" +
-            "-fx-border-radius: 5;" +
-            "-fx-background-radius: 5;"
-        );
-        box.setMaxWidth(700);
+        VBox textBox = createTextBox();
 
-        content.getChildren().add(box);
-        root.setCenter(content);
+        Button ctaButton = createCTAButton();
+
+        HBox features = createFeaturesSection();
+
+        mainContent.getChildren().addAll(headerImage, textBox, ctaButton, features);
+
+        StackPane contentContainer = new StackPane(mainContent);
+        contentContainer.setPadding(new Insets(20));
+        contentContainer.setStyle("-fx-background-color: rgba(255,255,255,0.7); " +
+                "-fx-background-radius: 15; " +
+                "-fx-border-radius: 15; " +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 0);");
+
+        root.setCenter(contentContainer);
+    }
+
+    private ImageView createHeaderImage() {
+        try {
+            Image image = new Image(getClass().getResourceAsStream("/images/theatre-header.jpg"));
+            ImageView imageView = new ImageView(image);
+            imageView.setFitWidth(600);
+            imageView.setPreserveRatio(true);
+            imageView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 5, 0);");
+            return imageView;
+        } catch (Exception e) {
+            ImageView placeholder = new ImageView();
+            placeholder.setStyle("-fx-background-color: #d7ccc8; -fx-min-width: 600px; -fx-min-height: 200px;");
+            return placeholder;
+        }
+    }
+
+    private VBox createTextBox() {
+        Label mainTitle = new Label("L'Art du Théâtre à Votre Portée");
+        mainTitle.setFont(Font.font("Playfair Display", FontWeight.BOLD, 32));
+        mainTitle.setTextFill(Color.web("#5d4037"));
+        mainTitle.setStyle("-fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.1), 2, 0, 1, 1);");
+
+        Label subtitle = new Label("Découvrez nos cours adaptés à tous les niveaux");
+        subtitle.setFont(Font.font("Raleway", 18));
+        subtitle.setTextFill(Color.web("#6d4c41"));
+
+        VBox textBox = new VBox(10, mainTitle, subtitle);
+        textBox.setAlignment(Pos.CENTER);
+        return textBox;
+    }
+
+    private Button createCTAButton() {
+        Button button = new Button("Découvrir nos cours");
+        button.setStyle("-fx-background-color: #8d6e63; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-size: 16px; " +
+                "-fx-font-weight: bold; " +
+                "-fx-padding: 12px 30px; " +
+                "-fx-background-radius: 25px;");
+
+        button.setOnMouseEntered(e -> button.setStyle(button.getStyle() + "-fx-background-color: #6d4c41;"));
+        button.setOnMouseExited(e -> button.setStyle(button.getStyle() + "-fx-background-color: #8d6e63;"));
+
+        button.setOnAction(e -> {
+            CoursView coursView = new CoursView(primaryStage);
+            primaryStage.getScene().setRoot(coursView.getView());
+        });
+
+        return button;
+    }
+
+    private HBox createFeaturesSection() {
+        HBox features = new HBox(30);
+        features.setAlignment(Pos.CENTER);
+
+        VBox feature1 = createFeatureItem("🎭", "Cours Variés", "Classique, improvisation, mise en scène...");
+
+        VBox feature2 = createFeatureItem("👥", "Petits Groupes", "Maximum 10 participants par cours");
+
+        VBox feature3 = createFeatureItem("🏛️", "Lieu Unique", "Studio en plein cœur de Paris");
+
+        features.getChildren().addAll(feature1, feature2, feature3);
+        return features;
+    }
+
+    private VBox createFeatureItem(String emoji, String title, String description) {
+        Label emojiLabel = new Label(emoji);
+        emojiLabel.setStyle("-fx-font-size: 28px;");
+
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #5d4037;");
+
+        Label descLabel = new Label(description);
+        descLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #6d4c41; -fx-wrap-text: true;");
+        descLabel.setMaxWidth(200);
+
+        VBox item = new VBox(8, emojiLabel, titleLabel, descLabel);
+        item.setAlignment(Pos.CENTER);
+        item.setStyle("-fx-padding: 20px; -fx-background-color: rgba(255,255,255,0.8); " +
+                "-fx-background-radius: 10; -fx-border-radius: 10;");
+
+        return item;
     }
 
     public BorderPane getView() {

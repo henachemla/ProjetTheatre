@@ -1,10 +1,13 @@
 package projet.controller;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import projet.database.DatabaseConnection;
 import projet.model.Utilisateur;
@@ -23,72 +26,126 @@ public class LoginController {
     private PasswordField passwordField, loginPasswordField;
     private Button inscrireButton, connecterButton;
     private Label messageLabel;
-    private Stage primaryStage;// 🔥 Ajout du Stage pour gérer les scènes
-    private int utilisateurId; // ✅ -1 signifie "non connecté"
-
+    private Stage primaryStage;
+    private int utilisateurId = -1;
 
     public LoginController(Stage primaryStage) {
-        this.primaryStage = primaryStage; // 🔥 Stocke le stage actuel
-       
-        
-     // 📝 Section Inscription
-        Label titreInscription = new Label("📝 Inscription");
-        nomField = new TextField();
-        nomField.setPromptText("Nom");
+        this.primaryStage = primaryStage;
 
-        emailField = new TextField();
-        emailField.setPromptText("Email");
+        root = new BorderPane();
+        root.setTop(navbar.createNavBar(primaryStage, "Connexion", utilisateurId));
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #f9f4ed 0%, #e8e0d1 100%);");
 
-        passwordField = new PasswordField();
-        passwordField.setPromptText("Mot de passe");
+        VBox mainContainer = new VBox();
+        mainContainer.setAlignment(Pos.CENTER);
+        mainContainer.setPadding(new Insets(40));
+        mainContainer.setStyle("-fx-background-color: rgba(255,255,255,0.7); " +
+                "-fx-background-radius: 15; -fx-border-radius: 15; " +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 0);");
 
-        inscrireButton = new Button("S'inscrire");
+        VBox inscriptionBox = createFormSection("📝 Inscription", true);
+        nomField = createStyledTextField("Nom");
+        emailField = createStyledTextField("Email");
+        passwordField = createStyledPasswordField("Mot de passe");
+        inscrireButton = createStyledButton("S'inscrire", "#6a0f1c");
         inscrireButton.setOnAction(e -> handleRegister());
 
-
-
-        // 🔐 Section Connexion
-        Label titreConnexion = new Label("🔐 Connexion");
-        loginEmailField = new TextField();
-        loginEmailField.setPromptText("Email");
-
-        loginPasswordField = new PasswordField();
-        loginPasswordField.setPromptText("Mot de passe");
-
-        connecterButton = new Button("Se connecter");
-        connecterButton.setOnAction(e -> handleLogin()); // 🔥 Lié directement à handleLogin()
+        VBox connexionBox = createFormSection("🔐 Connexion", false);
+        loginEmailField = createStyledTextField("Email");
+        loginPasswordField = createStyledPasswordField("Mot de passe");
+        connecterButton = createStyledButton("Se connecter", "#2e7d32");
+        connecterButton.setOnAction(e -> handleLogin());
 
         messageLabel = new Label();
-        
-     // ✅ Bouton Déconnexion
+        messageLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
+
+        inscriptionBox.getChildren().addAll(nomField, emailField, passwordField, inscrireButton);
+        connexionBox.getChildren().addAll(loginEmailField, loginPasswordField, connecterButton);
+
+        mainContainer.getChildren().addAll(
+                inscriptionBox,
+                new Separator(),
+                connexionBox,
+                messageLabel
+        );
+
         if (utilisateurId != -1) {
-        Button deconnexionButton = new Button("Déconnexion");
-        deconnexionButton.setStyle("-fx-background-color:#6a0f1c; -fx-text-fill: white;");
-        deconnexionButton.setOnAction(e -> handleLogout());
+            Button deconnexionButton = createStyledButton("Déconnexion", "#a52a2a");
+            deconnexionButton.setOnAction(e -> handleLogout());
+            mainContainer.getChildren().add(deconnexionButton);
         }
-        
-        // 📌 Organisation de l'affichage
-        view = new VBox(10, titreInscription, nomField, emailField, passwordField, inscrireButton, 
-titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLabel);
-        view.setStyle("-fx-padding: 20px; -fx-alignment: center;");
-        
-     // ✅ Ajout de la NavBar
-        root = new BorderPane();
 
-        // ✅ Ajout de la NavBar avec "Connexion" comme onglet actif
-        root.setTop(navbar.createNavBar(primaryStage, "Connexion", utilisateurId));
-
-        root.setCenter(view);
+        root.setCenter(mainContainer);
     }
-    
+
+    private VBox createFormSection(String title, boolean withNameField) {
+        Label titre = new Label(title);
+        titre.setStyle("-fx-font-family: 'Playfair Display'; -fx-font-size: 20px; " +
+                "-fx-text-fill: #5d4037; -fx-font-weight: bold;");
+
+        VBox section = new VBox(15);
+        section.setAlignment(Pos.CENTER);
+        section.setPadding(new Insets(20));
+        section.setStyle("-fx-background-color: rgba(255,255,255,0.8); " +
+                "-fx-background-radius: 10; -fx-padding: 20px;");
+        section.getChildren().add(titre);
+
+        return section;
+    }
+
+    private TextField createStyledTextField(String prompt) {
+        TextField field = new TextField();
+        field.setPromptText(prompt);
+        field.setStyle("-fx-font-family: 'Raleway'; -fx-font-size: 14px; " +
+                "-fx-background-radius: 5; -fx-padding: 8px; " +
+                "-fx-border-color: #e0d4c3; -fx-border-radius: 5;");
+        field.setMaxWidth(250);
+        return field;
+    }
+
+    private PasswordField createStyledPasswordField(String prompt) {
+        PasswordField field = new PasswordField();
+        field.setPromptText(prompt);
+        field.setStyle("-fx-font-family: 'Raleway'; -fx-font-size: 14px; " +
+                "-fx-background-radius: 5; -fx-padding: 8px; " +
+                "-fx-border-color: #e0d4c3; -fx-border-radius: 5;");
+        field.setMaxWidth(250);
+        return field;
+    }
+
+    private Button createStyledButton(String text, String color) {
+        Button btn = new Button(text);
+        btn.setStyle("-fx-background-color: " + color + "; " +
+                "-fx-text-fill: white; -fx-font-weight: bold; " +
+                "-fx-font-family: 'Raleway'; -fx-font-size: 14px; " +
+                "-fx-padding: 10px 25px; -fx-background-radius: 20px;");
+
+
+        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: " + darkenColor(color) + "; " +
+                "-fx-text-fill: white; -fx-font-weight: bold; " +
+                "-fx-padding: 10px 25px; -fx-background-radius: 20px;"));
+
+        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: " + color + "; " +
+                "-fx-text-fill: white; -fx-font-weight: bold; " +
+                "-fx-padding: 10px 25px; -fx-background-radius: 20px;"));
+        return btn;
+    }
+
+    private String darkenColor(String hexColor) {
+        switch(hexColor) {
+            case "#6a0f1c": return "#4a0a13";
+            case "#2e7d32": return "#1e5a22";
+            case "#a52a2a": return "#851a1a";
+            default: return "#333333";
+        }
+    }
+
     private void handleLogout() {
-    	Utilisateur.deconnecter();
-    	primaryStage.getScene().setRoot(new LoginController(primaryStage).getView());
+        Utilisateur.deconnecter();
+        primaryStage.getScene().setRoot(new LoginController(primaryStage).getView());
         System.out.println("❌ Déconnexion réussie !");
     }
 
-    
- // ✅ Méthode pour l'inscription d'un utilisateur
     private void handleRegister() {
         String nom = nomField.getText();
         String email = emailField.getText();
@@ -99,7 +156,6 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
             return;
         }
 
-        // 🔥 Ajout du champ "role" par défaut en "user"
         String sql = "INSERT INTO utilisateurs (nom, email, mot_de_passe, role, forfait_restants) VALUES (?, ?, ?, 'user', 10)";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -119,7 +175,6 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
         }
     }
 
-    //methode pour la connexion d'un utilisateur
     private void handleLogin() {
         String email = loginEmailField.getText();
         String motDePasse = loginPasswordField.getText();
@@ -129,7 +184,7 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
             return;
         }
 
-        String sql = "SELECT id, role FROM utilisateurs WHERE email = ? AND mot_de_passe = ?";
+        String sql = "SELECT id, nom, role FROM utilisateurs WHERE email = ? AND mot_de_passe = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -139,16 +194,19 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-            	Utilisateur.setUtilisateurId(rs.getInt("id"));
-                String role = rs.getString("role");  // Récupération du rôle
+                int userId = rs.getInt("id");
+                String nom = rs.getString("nom");
+                String role = rs.getString("role");
+
+                Utilisateur.setUtilisateurId(userId);
+                Utilisateur.setNom(nom);
 
                 messageLabel.setText("✅ Connexion réussie !");
-                
-                // 🔥 Redirection immédiate selon le rôle
+
                 if (role.equals("admin")) {
                     afficherInterfaceAdmin();
                 } else {
-                    afficherInterfaceUtilisateur(utilisateurId);
+                    afficherInterfaceUtilisateur(userId);
                 }
             } else {
                 messageLabel.setText("❌ Email ou mot de passe incorrect !");
@@ -159,20 +217,16 @@ titreConnexion, loginEmailField, loginPasswordField, connecterButton, messageLab
         }
     }
 
- // ✅ Afficher l'interface administrateur après connexion
     private void afficherInterfaceAdmin() {
         AdminInterfaceController adminInterface = new AdminInterfaceController(root, primaryStage);
-        root.setCenter(adminInterface.getView());    
+        root.setCenter(adminInterface.getView());
     }
 
-
-    // ✅ Afficher l'interface utilisateur
     private void afficherInterfaceUtilisateur(int utilisateurId) {
-    	AccueilView accueilView = new AccueilView(primaryStage);
+        AccueilView accueilView = new AccueilView(primaryStage);
         Scene accueilScene = new Scene(accueilView.getView(), 900, 600);
         primaryStage.setScene(accueilScene);
     }
-    
 
     public BorderPane getView() {
         return root;

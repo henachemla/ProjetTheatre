@@ -2,19 +2,18 @@ package projet.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import projet.database.DatabaseConnection;
-import projet.model.Cours;
 import projet.model.Reservation;
 import projet.view.navbar;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.List;
 
 public class ReservationController {
     private BorderPane root;
@@ -29,41 +28,70 @@ public class ReservationController {
         this.utilisateurId = utilisateurId;
         this.primaryStage = primaryStage;
 
-        // 📌 Titre
+        root = new BorderPane();
+        root.setTop(navbar.createNavBar(primaryStage, "Mes Réservations", utilisateurId));
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #f9f4ed 0%, #e8e0d1 100%);");
+
         Label titreReservations = new Label("📅 Mes Réservations");
-        titreReservations.setStyle("-fx-font-family: 'Palatino Linotype'; -fx-font-size: 20px; -fx-text-fill: #6a0f1c; -fx-font-weight: bold;");
+        titreReservations.setStyle("-fx-font-family: 'Playfair Display'; -fx-font-size: 24px; -fx-text-fill: #5d4037; " +
+                "-fx-font-weight: bold; -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.1), 2, 0, 1, 1);");
 
-        // ❗ Message d'information
         messageLabel = new Label();
-        messageLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+        messageLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 12px;");
 
-        // 📋 TableView
         reservationsTable = new TableView<>();
         reservationsTable.setItems(reservationsList);
-        reservationsTable.setStyle("-fx-background-color: #fefcf7; -fx-font-family: 'Georgia';");
+        reservationsTable.setStyle("-fx-background-color: rgba(255,255,255,0.7); -fx-background-radius: 15; " +
+                "-fx-border-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 0);");
         reservationsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // 🧱 Colonnes
+        reservationsTable.setRowFactory(tv -> {
+            TableRow<Reservation> row = new TableRow<>();
+            row.hoverProperty().addListener((obs, oldVal, isHovering) -> {
+                if (isHovering && !row.isEmpty()) {
+                    row.setStyle("-fx-background-color: #f3e9e1;");
+                } else {
+                    row.setStyle("");
+                }
+            });
+            return row;
+        });
+
         TableColumn<Reservation, String> nomCol = new TableColumn<>("Cours");
         nomCol.setCellValueFactory(cell -> cell.getValue().nomCoursProperty());
-        nomCol.setMaxWidth(1f * Integer.MAX_VALUE * 50);
+        nomCol.setStyle("-fx-font-family: 'Georgia'; -fx-text-fill: #5d4037;");
 
         TableColumn<Reservation, String> dateCol = new TableColumn<>("Date");
         dateCol.setCellValueFactory(cell -> cell.getValue().dateProperty());
-        dateCol.setMaxWidth(1f * Integer.MAX_VALUE * 30);
+        dateCol.setStyle("-fx-font-family: 'Georgia';");
 
         TableColumn<Reservation, Void> actionCol = new TableColumn<>("Action");
-        actionCol.setMaxWidth(1f * Integer.MAX_VALUE * 20);
         actionCol.setCellFactory(col -> new TableCell<>() {
             private final Button btn = new Button("🗑");
 
             {
                 btn.setStyle(
-                    "-fx-background-color: #6a0f1c; " +
-                    "-fx-text-fill: white; " +
-                    "-fx-background-radius: 6px; " +
-                    "-fx-padding: 4px 8px;"
+                        "-fx-background-color: #6a0f1c; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-background-radius: 15px; " +
+                                "-fx-padding: 5px 10px; " +
+                                "-fx-cursor: hand;"
                 );
+
+                btn.setOnMouseEntered(e -> btn.setStyle(
+                        "-fx-background-color: #8d6e63; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-background-radius: 15px; " +
+                                "-fx-padding: 5px 10px;"
+                ));
+
+                btn.setOnMouseExited(e -> btn.setStyle(
+                        "-fx-background-color: #6a0f1c; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-background-radius: 15px; " +
+                                "-fx-padding: 5px 10px;"
+                ));
+
                 btn.setOnAction(e -> {
                     Reservation res = getTableView().getItems().get(getIndex());
                     supprimerReservation(res);
@@ -79,21 +107,19 @@ public class ReservationController {
 
         reservationsTable.getColumns().addAll(nomCol, dateCol, actionCol);
 
-        // 📦 Vue centrale
-        view = new VBox(10, messageLabel, titreReservations, reservationsTable);
-        view.setStyle("-fx-padding: 20px; -fx-alignment: center; -fx-background-color: #f9f4ed;");
+        view = new VBox(20, messageLabel, titreReservations, reservationsTable);
+        view.setAlignment(Pos.CENTER);
+        view.setPadding(new Insets(30));
+        view.setStyle("-fx-background-color: rgba(255,255,255,0.5); -fx-background-radius: 15; -fx-padding: 20;");
 
-        // 📌 Structure générale
-        root = new BorderPane();
-        root.setTop(navbar.createNavBar(primaryStage, "Mes Réservations", utilisateurId));
-        root.setCenter(view);
-        root.setStyle("-fx-background-color: #f9f4ed;");
+        StackPane centerContainer = new StackPane(view);
+        centerContainer.setPadding(new Insets(20));
 
-        // 📥 Chargement des données
+        root.setCenter(centerContainer);
+
         chargerReservations();
     }
 
-    // ❌ Supprimer une réservation
     private void supprimerReservation(Reservation res) {
         String sql = "DELETE FROM reservations WHERE utilisateur_id = ? AND cours_id = ?";
         String updatePlaces = "UPDATE cours SET places_dispo = places_dispo + 1 WHERE cours_id = ?";
@@ -116,7 +142,7 @@ public class ReservationController {
         }
     }
 
-    // 📥 Charger les réservations
+    // 📥 Charger les réservations (identique à l'original)
     private void chargerReservations() {
         reservationsList.clear();
         String sql = "SELECT c.nom, r.date, c.cours_id FROM reservations r JOIN cours c ON r.cours_id = c.cours_id WHERE r.utilisateur_id = ?";

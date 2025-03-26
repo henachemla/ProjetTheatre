@@ -1,119 +1,132 @@
 package projet.view;
 
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.geometry.*;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import projet.controller.LoginController;
-import projet.controller.ReservationController;
-import projet.model.Cours;
+import projet.controller.*;
 import projet.model.Utilisateur;
 
 public class navbar {
 
     public static BorderPane createNavBar(Stage primaryStage, String activeTab, int utilisateurId) {
         BorderPane navbar = new BorderPane();
-        navbar.setStyle("-fx-background-color: #ffffff;"); // ou #fffdf9
-        navbar.getStyleClass().add("navbar");
+        applyNavbarStyle(navbar);
 
-        // 📌 Boutons de la navigation
-        Button btnAccueil = createNavButton("Accueil", activeTab, primaryStage);
-        Button btnCours = createNavButton("Cours", activeTab, primaryStage);
-        Button btnReservations = createNavButton("Mes Réservations", activeTab, primaryStage);
-        Button btnAPropos = createNavButton("À propos", activeTab, primaryStage);
-
-        
-     // 📌 Navigation entre les pages
-        btnAccueil.setOnAction(e -> {
-            AccueilView accueilView = new AccueilView(primaryStage);
-            primaryStage.getScene().setRoot(accueilView.getView()); // 🔥 Change uniquement le contenu
-        });
-        
-        btnCours.setOnAction(e -> {
-            CoursView coursView = new CoursView(primaryStage);
-            primaryStage.getScene().setRoot(coursView.getView());
-        });
-
-
-        btnReservations.setOnAction(e -> {
-			ReservationController reservationController = new ReservationController(primaryStage, utilisateurId); // Remplace 1 par l'ID utilisateur actuel si possible
-            primaryStage.getScene().setRoot(reservationController.getView());
-        });
-        
-
-        // 📌 Section gauche (Onglets)
-        HBox leftSection = new HBox(10, btnAccueil, btnCours, btnReservations, btnAPropos);
-        leftSection.setAlignment(Pos.CENTER);
-        leftSection.setPadding(new Insets(0, 20, 0, 0));
+        // Section navigation
+        HBox leftSection = createLeftSection(primaryStage, activeTab);
         navbar.setLeft(leftSection);
 
-        // 📌 Section droite (Contact + Connexion)
-        HBox rightSection = new HBox(10);
-        rightSection.setAlignment(Pos.CENTER);
-        rightSection.setPadding(new Insets(0, 20, 0, 0));
-        
-        Button btnContact = createNavButton("Contact", activeTab, primaryStage);
-        btnContact.setStyle("-fx-font-size: 14px; -fx-background-color: #4c70ba; -fx-text-fill: white; -fx-padding: 5px 10px; -fx-border-radius: 5px;");
-
-        
-        if (Utilisateur.estConnecte()) {
-            Button btnDeconnexion = new Button("Déconnexion");
-            btnDeconnexion.setStyle("-fx-font-size: 14px; -fx-background-color: red; -fx-text-fill: white; -fx-padding: 5px 10px; -fx-border-radius: 5px;");
-            btnDeconnexion.setOnAction(e -> {
-                Utilisateur.deconnecter();
-                primaryStage.setScene(new Scene(new LoginController(primaryStage).getView(), 900, 600));
-            });
-            rightSection.getChildren().addAll(btnContact, btnDeconnexion);
-        } else {
-            Button btnConnexion = new Button("👤");
-            btnConnexion.setStyle("-fx-font-size: 16px; -fx-background-color: transparent; -fx-text-fill: black;");
-            btnConnexion.setOnAction(e -> {
-                primaryStage.setScene(new Scene(new LoginController(primaryStage).getView(), 900, 600));
-            });
-            rightSection.getChildren().addAll(btnContact, btnConnexion);
-        }
-
-        
+        // Section utilisateur
+        HBox rightSection = createRightSection(primaryStage);
         navbar.setRight(rightSection);
 
         return navbar;
     }
 
-    // ✅ Méthode pour créer un bouton avec style + mise en gras de l'onglet actif
-    private static Button createNavButton(String text, String activeTab, Stage primaryStage) {
-        Button button = new Button(text);
-        button.setStyle("-fx-font-size: 14px; -fx-background-color: transparent; -fx-text-fill: black;");        
-     // 🔥 Mettre en gras si c'est l'onglet actif
-        if (text.equals(activeTab)) {
-            button.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-background-color: transparent; -fx-text-fill: black;");
-        } else {
-            button.setStyle("-fx-font-size: 14px; -fx-background-color: transparent; -fx-text-fill: black;");
-        }
-        
-     // 📌 Ajout de la navigation dynamique
-        button.setOnAction(e -> {
-            switch (text) {
-                case "Accueil":
-                    primaryStage.getScene().setRoot(new AccueilView(primaryStage).getView());
-                    break;
-                case "Mes Réservations":
-                    primaryStage.getScene().setRoot(new ReservationController(primaryStage, Utilisateur.getUtilisateurId()).getView()); // Remplace 1 par l'ID utilisateur actuel
-                    break;
-                case "Cours":
-                	primaryStage.getScene().setRoot(new CoursView(primaryStage).getView());                	
-                	break;
-                case "Contact":
-                	primaryStage.getScene().setRoot(new ContactView(primaryStage, Utilisateur.getUtilisateurId()).getView());                	
-                	break;
-                case "À propos":
-                	primaryStage.getScene().setRoot(new aPropos(primaryStage).getView());                	
-                	break;
-            }
-        });
+    private static void applyNavbarStyle(BorderPane navbar) {
+        navbar.setStyle("-fx-background-color: #f9f4ed; " +
+                "-fx-border-color: #e0d4c3; " +
+                "-fx-border-width: 0 0 1px 0; " +
+                "-fx-padding: 15;");
+    }
 
-        return button;
+    private static HBox createLeftSection(Stage stage, String activeTab) {
+        HBox leftBox = new HBox(20);
+        leftBox.setAlignment(Pos.CENTER_LEFT);
+        leftBox.setPadding(new Insets(0, 0, 0, 30));
+
+        String[] tabs = {"Accueil", "Cours", "Mes Réservations", "À propos"};
+        for (String tab : tabs) {
+            Button btn = createNavButton(tab, tab.equals(activeTab));
+            btn.setOnAction(e -> handleNavigation(stage, tab));
+            leftBox.getChildren().add(btn);
+        }
+
+        return leftBox;
+    }
+
+    private static HBox createRightSection(Stage stage) {
+        HBox rightBox = new HBox(15);
+        rightBox.setAlignment(Pos.CENTER);
+        rightBox.setPadding(new Insets(0, 30, 0, 0));
+
+        Button contactBtn = createActionButton("Contact", "#6a0f1c");
+        contactBtn.setOnAction(e -> handleNavigation(stage, "Contact"));
+
+        if (Utilisateur.estConnecte()) {
+            // Affichez le nom au lieu de l'ID
+            Label userLabel = new Label(Utilisateur.getNomCourt());
+            userLabel.setStyle("-fx-text-fill: #5d4037; -fx-font-weight: bold;");
+
+            Button logoutBtn = createActionButton("Déconnexion", "#a52a2a");
+            logoutBtn.setOnAction(e -> {
+                Utilisateur.deconnecter();
+                stage.setScene(new Scene(new LoginController(stage).getView()));
+            });
+
+            rightBox.getChildren().addAll(userLabel, contactBtn, logoutBtn);
+        } else {
+            Button loginBtn = createActionButton("Connexion", "#2e7d32");
+            loginBtn.setOnAction(e -> stage.setScene(new Scene(new LoginController(stage).getView())));
+            rightBox.getChildren().addAll(contactBtn, loginBtn);
+        }
+
+        return rightBox;
+    }
+
+    private static Button createNavButton(String text, boolean isActive) {
+        Button btn = new Button(text);
+        String baseStyle = "-fx-background-color: transparent; " +
+                "-fx-font-family: 'Raleway'; " +
+                "-fx-font-size: 14px; " +
+                "-fx-padding: 5 10; " +
+                "-fx-cursor: hand; ";
+
+        if (isActive) {
+            btn.setStyle(baseStyle + "-fx-text-fill: #6a0f1c; -fx-font-weight: bold;");
+        } else {
+            btn.setStyle(baseStyle + "-fx-text-fill: #5d4037;");
+            btn.setOnMouseEntered(e -> btn.setStyle(baseStyle + "-fx-text-fill: #8d6e63;"));
+            btn.setOnMouseExited(e -> btn.setStyle(baseStyle + "-fx-text-fill: #5d4037;"));
+        }
+        return btn;
+    }
+
+    private static Button createActionButton(String text, String color) {
+        Button btn = new Button(text);
+        btn.setStyle("-fx-background-color: " + color + "; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-family: 'Raleway'; " +
+                "-fx-font-size: 13px; " +
+                "-fx-font-weight: bold; " +
+                "-fx-padding: 7 15; " +
+                "-fx-background-radius: 20; " +
+                "-fx-cursor: hand;");
+
+        btn.setOnMouseEntered(e -> btn.setOpacity(0.85));
+        btn.setOnMouseExited(e -> btn.setOpacity(1));
+        return btn;
+    }
+
+    private static void handleNavigation(Stage stage, String destination) {
+        switch (destination) {
+            case "Accueil":
+                stage.getScene().setRoot(new AccueilView(stage).getView());
+                break;
+            case "Mes Réservations":
+                stage.getScene().setRoot(new ReservationController(stage, Utilisateur.getUtilisateurId()).getView());
+                break;
+            case "Cours":
+                stage.getScene().setRoot(new CoursView(stage).getView());
+                break;
+            case "Contact":
+                stage.getScene().setRoot(new ContactView(stage, Utilisateur.getUtilisateurId()).getView());
+                break;
+            case "À propos":
+                stage.getScene().setRoot(new aPropos(stage).getView());
+                break;
+        }
     }
 }
