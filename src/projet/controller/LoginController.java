@@ -218,7 +218,11 @@ public class LoginController {
     }
 
     private void afficherInterfaceAdmin() {
-        AdminInterfaceController adminInterface = new AdminInterfaceController(root, primaryStage);
+        // Récupérer l'ID de l'utilisateur connecté depuis la classe Utilisateur
+        int userId = Utilisateur.getUtilisateurId();
+
+        // Passer les 3 arguments requis au constructeur
+        AdminInterfaceController adminInterface = new AdminInterfaceController(root, primaryStage, userId);
         root.setCenter(adminInterface.getView());
     }
 

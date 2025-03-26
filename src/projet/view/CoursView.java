@@ -17,6 +17,7 @@ import projet.model.Utilisateur;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,11 @@ public class CoursView {
 
     public CoursView(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        initializeUI();
+        loadCoursesFromDatabase();
+    }
 
+    private void initializeUI() {
         root = new BorderPane();
         root.setTop(navbar.createNavBar(primaryStage, "Cours", Utilisateur.getUtilisateurId()));
         root.setStyle("-fx-background-color: linear-gradient(to bottom right, #f9f4ed 0%, #e8e0d1 100%);");
@@ -44,110 +49,6 @@ public class CoursView {
         tableCours.setStyle("-fx-background-color: rgba(255,255,255,0.7); -fx-background-radius: 15; " +
                 "-fx-border-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 0);");
 
-        tableCours.setRowFactory(tv -> {
-            TableRow<Cours> row = new TableRow<>();
-            row.hoverProperty().addListener((obs, oldVal, isHovering) -> {
-                if (isHovering && !row.isEmpty()) {
-                    row.setStyle("-fx-background-color: #f3e9e1;");
-                } else {
-                    row.setStyle("");
-                }
-            });
-            return row;
-        });
-
-        setupTable();
-
-        validerReservationsButton = new Button("Valider mes réservations");
-        validerReservationsButton.setDisable(true);
-        validerReservationsButton.setStyle("-fx-background-color: #8d6e63; -fx-text-fill: white; " +
-                "-fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 12px 30px; " +
-                "-fx-background-radius: 25px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 0);");
-
-        validerReservationsButton.setOnMouseEntered(e ->
-                validerReservationsButton.setStyle("-fx-background-color: #6d4c41; -fx-text-fill: white; " +
-                        "-fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 12px 30px; " +
-                        "-fx-background-radius: 25px;")
-        );
-        validerReservationsButton.setOnMouseExited(e ->
-                validerReservationsButton.setStyle("-fx-background-color: #8d6e63; -fx-text-fill: white; " +
-                        "-fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 12px 30px; " +
-                        "-fx-background-radius: 25px;")
-        );
-
-        validerReservationsButton.setOnAction(e -> {
-            if (!Utilisateur.estConnecte()) {
-                showConnexionError();
-            } else {
-                validerReservations(getCoursSelectionnes());
-            }
-        });
-
-        erreurLabel = new Label();
-        erreurLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 12px;");
-
-        infoConnexionLabel = new Label();
-        infoConnexionLabel.setStyle("-fx-text-fill: #6a0f1c; -fx-font-size: 12px;");
-        updateConnexionStatus();
-
-        VBox content = new VBox(20, titre, tableCours, validerReservationsButton, infoConnexionLabel, erreurLabel);
-        content.setAlignment(Pos.CENTER);
-        content.setPadding(new Insets(30));
-        content.setStyle("-fx-background-color: rgba(255,255,255,0.5); -fx-background-radius: 15; -fx-padding: 20;");
-
-        Label forfait = new Label("Forfaits");
-        forfait.setStyle("-fx-font-family: 'Playfair Display'; -fx-font-size: 20px; " +
-                "-fx-text-fill: #5d4037; -fx-font-weight: bold;");
-
-        VBox forfaitsBox = new VBox(15,
-                createForfaitBox("🎭 5 cours", "Idéal pour une initiation"),
-                createForfaitBox("🎭🎭 10 cours", "Parfait pour un suivi régulier"),
-                createForfaitBox("🎭🎭🎭 20 cours", "Pour les passionnés")
-        );
-        forfaitsBox.setAlignment(Pos.CENTER);
-
-        VBox rightContent = new VBox(20, forfait, forfaitsBox);
-        rightContent.setAlignment(Pos.TOP_CENTER);
-        rightContent.setPadding(new Insets(20));
-        rightContent.setStyle("-fx-background-color: rgba(255,255,255,0.5); -fx-background-radius: 15; -fx-padding: 20;");
-
-        Label paiementLabel = new Label("💳 Tous les paiements se font sur place.");
-        paiementLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #6a0f1c; -fx-font-size: 13px;");
-
-        StackPane centerContainer = new StackPane(content);
-        centerContainer.setPadding(new Insets(20));
-
-        root.setCenter(centerContainer);
-        root.setRight(rightContent);
-        root.setBottom(paiementLabel);
-        BorderPane.setAlignment(paiementLabel, Pos.CENTER);
-
-        FadeTransition fadeTable = new FadeTransition(Duration.millis(500), tableCours);
-        fadeTable.setFromValue(0);
-        fadeTable.setToValue(1);
-        fadeTable.play();
-    }
-
-    private void updateConnexionStatus() {
-        if (Utilisateur.estConnecte()) {
-            infoConnexionLabel.setText("✅ Vous êtes connecté(e)");
-            infoConnexionLabel.setStyle("-fx-text-fill: #2e7d32;");
-        } else {
-            infoConnexionLabel.setText("ℹ️ Connectez-vous pour réserver des cours");
-            infoConnexionLabel.setStyle("-fx-text-fill: #6a0f1c;");
-        }
-    }
-
-    private void showConnexionError() {
-        erreurLabel.setText("❌ Veuillez vous connecter pour réserver un cours.");
-
-        FadeTransition ft = new FadeTransition(Duration.millis(300), erreurLabel);
-        ft.setFromValue(0);
-        ft.setToValue(1);
-        ft.play();
-    }
-
-    private void setupTable() {
         TableColumn<Cours, String> colNom = new TableColumn<>("Cours");
         colNom.setCellValueFactory(data -> data.getValue().nomProperty());
         colNom.setStyle("-fx-font-family: 'Georgia'; -fx-text-fill: #5d4037;");
@@ -164,31 +65,185 @@ public class CoursView {
         colPrix.setCellValueFactory(data -> data.getValue().prixProperty());
         colPrix.setStyle("-fx-font-family: 'Georgia';");
 
-        TableColumn<Cours, CheckBox> colSelection = new TableColumn<>("");
+        TableColumn<Cours, Integer> colPlaces = new TableColumn<>("Places");
+        colPlaces.setCellValueFactory(data -> data.getValue().placesDispoProperty().asObject());
+        colPlaces.setStyle("-fx-font-family: 'Georgia';");
+
+        TableColumn<Cours, CheckBox> colSelection = new TableColumn<>("Réserver");
         colSelection.setCellValueFactory(data -> {
-            CheckBox check = new CheckBox();
-            check.setStyle("-fx-text-fill: #5d4037;");
+            CheckBox check = data.getValue().getCheckBox();
             check.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
                 validerReservationsButton.setDisable(getCoursSelectionnes().isEmpty());
             });
-            data.getValue().setCheckBox(check);
             return new SimpleObjectProperty<>(check);
         });
 
-        tableCours.getColumns().addAll(colNom, colDescription, colTrancheAge, colPrix, colSelection);
+        tableCours.getColumns().addAll(colNom, colDescription, colTrancheAge, colPrix, colPlaces, colSelection);
         tableCours.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        coursList = FXCollections.observableArrayList(
-                new Cours(1, "Théâtre Classique", "Découverte des classiques - 1h - Lundi", 10, "15-25 ans", "30€"),
-                new Cours(2, "Improvisation", "Ateliers de scène libre - 1h30 - Mardi", 10, "16-30 ans", "30€"),
-                new Cours(3, "Expression Scénique", "Travail sur l'émotion - 2h - Mercredi", 10, "18+ ans", "40€"),
-                new Cours(4, "Mise en Scène", "Création d'une pièce - 2h30 - Jeudi", 10, "20+ ans", "50€"),
-                new Cours(5, "Jeu corporel", "Expression par le corps - 1h - Vendredi", 10, "15-20 ans", "20€"),
-                new Cours(6, "Lecture à voix haute", "Interprétation de textes - 1h30 - Samedi", 10, "16-25 ans", "30€"),
-                new Cours(7, "Impro musicale", "Improvisation avec instruments - 2h - Dimanche", 10, "16-30 ans", "40€")
-        );
+        tableCours.setRowFactory(tv -> {
+            TableRow<Cours> row = new TableRow<>();
+            row.hoverProperty().addListener((obs, oldVal, isHovering) -> {
+                if (isHovering && !row.isEmpty()) {
+                    row.setStyle("-fx-background-color: #f3e9e1;");
+                } else {
+                    row.setStyle("");
+                }
+            });
+            return row;
+        });
 
-        tableCours.setItems(coursList);
+        validerReservationsButton = new Button("Valider mes réservations");
+        validerReservationsButton.setDisable(true);
+        styleButton(validerReservationsButton, "#8d6e63", "#6d4c41");
+        validerReservationsButton.setOnAction(e -> handleReservation());
+
+        erreurLabel = new Label();
+        erreurLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 12px;");
+
+        infoConnexionLabel = new Label();
+        updateConnexionStatus();
+
+        VBox content = new VBox(20, titre, tableCours, validerReservationsButton, infoConnexionLabel, erreurLabel);
+        content.setAlignment(Pos.CENTER);
+        content.setPadding(new Insets(30));
+        content.setStyle("-fx-background-color: rgba(255,255,255,0.5); -fx-background-radius: 15; -fx-padding: 20;");
+
+        VBox forfaitsBox = createForfaitsSection();
+        VBox rightContent = new VBox(20, new Label("Forfaits"), forfaitsBox);
+        styleRightContent(rightContent);
+
+        Label paiementLabel = new Label("💳 Tous les paiements se font sur place.");
+        stylePaiementLabel(paiementLabel);
+
+        StackPane centerContainer = new StackPane(content);
+        centerContainer.setPadding(new Insets(20));
+
+        root.setCenter(centerContainer);
+        root.setRight(rightContent);
+        root.setBottom(paiementLabel);
+        BorderPane.setAlignment(paiementLabel, Pos.CENTER);
+
+        animateTable();
+    }
+
+    private void loadCoursesFromDatabase() {
+        coursList = FXCollections.observableArrayList();
+        String sql = "SELECT * FROM cours WHERE places_dispo > 0 ORDER BY cours_id";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Cours cours = new Cours(
+                        rs.getInt("cours_id"),
+                        rs.getString("nom"),
+                        rs.getString("description"),
+                        rs.getInt("places_dispo"),
+                        rs.getString("tranche_age"),
+                        rs.getString("prix")
+                );
+                coursList.add(cours);
+            }
+
+            tableCours.setItems(coursList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("❌ Erreur lors du chargement des cours");
+        }
+    }
+
+    private void handleReservation() {
+        if (!Utilisateur.estConnecte()) {
+            showConnexionError();
+        } else {
+            validerReservations(getCoursSelectionnes());
+        }
+    }
+
+    private List<Cours> getCoursSelectionnes() {
+        List<Cours> selectionnes = new ArrayList<>();
+        for (Cours cours : tableCours.getItems()) {
+            if (cours.getCheckBox() != null && cours.getCheckBox().isSelected()) {
+                selectionnes.add(cours);
+            }
+        }
+        return selectionnes;
+    }
+
+    private void validerReservations(List<Cours> coursSelectionnes) {
+        if (coursSelectionnes.isEmpty()) {
+            showError("❌ Veuillez sélectionner au moins un cours.");
+            return;
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false); // Démarrer une transaction
+
+            try {
+                for (Cours cours : coursSelectionnes) {
+                    // Vérifier les places disponibles
+                    String checkSql = "SELECT places_dispo FROM cours WHERE cours_id = ? FOR UPDATE";
+                    try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                        checkStmt.setInt(1, cours.getCoursId());
+                        ResultSet rs = checkStmt.executeQuery();
+                        if (rs.next() && rs.getInt("places_dispo") <= 0) {
+                            throw new Exception("Plus de places disponibles pour: " + cours.getNom());
+                        }
+                    }
+
+                    String insertSql = "INSERT INTO reservations (utilisateur_id, cours_id, date) VALUES (?, ?, NOW())";
+                    try (PreparedStatement stmt = conn.prepareStatement(insertSql)) {
+                        stmt.setInt(1, Utilisateur.getUtilisateurId());
+                        stmt.setInt(2, cours.getCoursId());
+                        stmt.executeUpdate();
+                    }
+
+                    String updateSql = "UPDATE cours SET places_dispo = places_dispo - 1 WHERE cours_id = ?";
+                    try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                        updateStmt.setInt(1, cours.getCoursId());
+                        updateStmt.executeUpdate();
+                    }
+                }
+                conn.commit();
+
+                ReservationController reservationController = new ReservationController(primaryStage, Utilisateur.getUtilisateurId());
+                primaryStage.getScene().setRoot(reservationController.getView());
+
+            } catch (Exception e) {
+                conn.rollback();
+                showError("❌ " + e.getMessage());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("❌ Erreur lors de la réservation. Veuillez réessayer.");
+        }
+    }
+
+    private void styleButton(Button button, String baseColor, String hoverColor) {
+        button.setStyle("-fx-background-color: " + baseColor + "; " +
+                "-fx-text-fill: white; -fx-font-size: 16px; " +
+                "-fx-font-weight: bold; -fx-padding: 12px 30px; " +
+                "-fx-background-radius: 25px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 0);");
+
+        button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: " + hoverColor + "; " +
+                "-fx-text-fill: white; -fx-font-size: 16px; " +
+                "-fx-font-weight: bold; -fx-padding: 12px 30px; " +
+                "-fx-background-radius: 25px;"));
+
+        button.setOnMouseExited(e -> button.setStyle("-fx-background-color: " + baseColor + "; " +
+                "-fx-text-fill: white; -fx-font-size: 16px; " +
+                "-fx-font-weight: bold; -fx-padding: 12px 30px; " +
+                "-fx-background-radius: 25px;"));
+    }
+
+    private VBox createForfaitsSection() {
+        VBox forfait1 = createForfaitBox("🎭 5 cours", "Idéal pour une initiation");
+        VBox forfait2 = createForfaitBox("🎭🎭 10 cours", "Parfait pour un suivi régulier");
+        VBox forfait3 = createForfaitBox("🎭🎭🎭 20 cours", "Pour les passionnés");
+
+        return new VBox(15, forfait1, forfait2, forfait3);
     }
 
     private VBox createForfaitBox(String titre, String description) {
@@ -207,55 +262,53 @@ public class CoursView {
         return box;
     }
 
-    private List<Cours> getCoursSelectionnes() {
-        List<Cours> selectionnes = new ArrayList<>();
-        for (Cours cours : tableCours.getItems()) {
-            if (cours.getCheckBox() != null && cours.getCheckBox().isSelected()) {
-                selectionnes.add(cours);
-            }
-        }
-        return selectionnes;
+    private void styleRightContent(VBox rightContent) {
+        rightContent.setAlignment(Pos.TOP_CENTER);
+        rightContent.setPadding(new Insets(20));
+        rightContent.setStyle("-fx-background-color: rgba(255,255,255,0.5); -fx-background-radius: 15; -fx-padding: 20;");
+
+        Label forfaitLabel = (Label) rightContent.getChildren().get(0);
+        forfaitLabel.setStyle("-fx-font-family: 'Playfair Display'; -fx-font-size: 20px; " +
+                "-fx-text-fill: #5d4037; -fx-font-weight: bold;");
     }
 
-    private void validerReservations(List<Cours> coursSelectionnes) {
-        if (coursSelectionnes.isEmpty()) {
-            erreurLabel.setText("❌ Veuillez sélectionner au moins un cours.");
-            return;
+    private void stylePaiementLabel(Label label) {
+        label.setStyle("-fx-font-style: italic; -fx-text-fill: #6a0f1c; -fx-font-size: 13px;");
+    }
+
+    private void animateTable() {
+        FadeTransition fadeTable = new FadeTransition(Duration.millis(500), tableCours);
+        fadeTable.setFromValue(0);
+        fadeTable.setToValue(1);
+        fadeTable.play();
+    }
+
+    private void updateConnexionStatus() {
+        infoConnexionLabel.setStyle("-fx-font-size: 12px;");
+        if (Utilisateur.estConnecte()) {
+            infoConnexionLabel.setText("✅ Vous êtes connecté(e)");
+            infoConnexionLabel.setStyle("-fx-text-fill: #2e7d32;");
+        } else {
+            infoConnexionLabel.setText("ℹ️ Connectez-vous pour réserver des cours");
+            infoConnexionLabel.setStyle("-fx-text-fill: #6a0f1c;");
         }
+    }
 
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            for (Cours cours : coursSelectionnes) {
-                String checkSql = "SELECT places_dispo FROM cours WHERE cours_id = ?";
-                try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-                    checkStmt.setInt(1, cours.getCoursId());
-                    var rs = checkStmt.executeQuery();
-                    if (rs.next() && rs.getInt("places_dispo") <= 0) {
-                        erreurLabel.setText("❌ Plus de places disponibles pour: " + cours.nomProperty());
-                        return;
-                    }
-                }
+    private void showConnexionError() {
+        showError("❌ Veuillez vous connecter pour réserver un cours.");
+        animateErrorLabel();
+    }
 
-                String insertSql = "INSERT INTO reservations (utilisateur_id, cours_id, date) VALUES (?, ?, NOW())";
-                try (PreparedStatement stmt = conn.prepareStatement(insertSql)) {
-                    stmt.setInt(1, Utilisateur.getUtilisateurId());
-                    stmt.setInt(2, cours.getCoursId());
-                    stmt.executeUpdate();
-                }
+    private void showError(String message) {
+        erreurLabel.setText(message);
+        animateErrorLabel();
+    }
 
-                String updateSql = "UPDATE cours SET places_dispo = places_dispo - 1 WHERE cours_id = ?";
-                try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
-                    updateStmt.setInt(1, cours.getCoursId());
-                    updateStmt.executeUpdate();
-                }
-            }
-
-            ReservationController reservationController = new ReservationController(primaryStage, Utilisateur.getUtilisateurId());
-            primaryStage.getScene().setRoot(reservationController.getView());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            erreurLabel.setText("❌ Erreur lors de la réservation. Veuillez réessayer.");
-        }
+    private void animateErrorLabel() {
+        FadeTransition ft = new FadeTransition(Duration.millis(300), erreurLabel);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.play();
     }
 
     public BorderPane getView() {

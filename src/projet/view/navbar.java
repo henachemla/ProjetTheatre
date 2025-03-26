@@ -68,7 +68,7 @@ public class navbar {
 
             rightBox.getChildren().addAll(userLabel, contactBtn, logoutBtn);
         } else {
-            Button loginBtn = createActionButton("Connexion", "#2e7d32");
+            Button loginBtn = createActionButton("👤", "#6a0f1c");
             loginBtn.setOnAction(e -> stage.setScene(new Scene(new LoginController(stage).getView())));
             rightBox.getChildren().addAll(contactBtn, loginBtn);
         }
