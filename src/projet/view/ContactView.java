@@ -34,8 +34,8 @@ public class ContactView {
         Image profilePic;
         try {
             // Chemin correct : PAS de "/resources", car "resources" est déjà dans le classpath
-            profilePic = new Image(getClass().getResource("/images/matthieu poulet.jpg").toExternalForm());
-            System.out.println("✅ Image chargée depuis : " + getClass().getResource("/images/matthieu poulet.jpg"));
+            profilePic = new Image(getClass().getResource("images/matthieu poulet.jpg").toExternalForm());
+            System.out.println("✅ Image chargée depuis : " + getClass().getResource("images/matthieu poulet.jpg"));
         } catch (Exception e) {
             System.out.println("❌ Erreur de chargement image : " + e.getMessage());
             profilePic = new Image("https://via.placeholder.com/100"); // fallback au cas où

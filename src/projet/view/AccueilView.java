@@ -31,15 +31,6 @@ public class AccueilView {
         root.setTop(navbar.createNavBar(primaryStage, "Accueil", utilisateurId));
         root.setStyle("-fx-background-color: #f9f4ed;");
         
-     // 📸 Appliquer l'image de fond au BorderPane
-        BackgroundImage backgroundImage = new BackgroundImage(
-            new Image(getClass().getResource("/images/jamais.jpg").toExternalForm(), 900, 600, false, true),
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.CENTER,
-            new BackgroundSize(100, 100, true, true, false, true)
-        );
-        root.setBackground(new Background(backgroundImage));
 
         // 🎭 Contenu centré
         VBox content = new VBox(30);
