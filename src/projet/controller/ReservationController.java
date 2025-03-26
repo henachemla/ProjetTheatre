@@ -145,19 +145,23 @@ public class ReservationController {
     // 📥 Charger les réservations (identique à l'original)
     private void chargerReservations() {
         reservationsList.clear();
-        String sql = "SELECT c.nom, r.date, c.cours_id FROM reservations r JOIN cours c ON r.cours_id = c.cours_id WHERE r.utilisateur_id = ?";
-
+        String sql = "SELECT u.id, u.nom, u.email, c.nom AS cours_nom, r.date\n" +
+                "FROM reservations r\n" +
+                "JOIN utilisateurs u ON r.utilisateur_id = u.id\n" +
+                "JOIN cours c ON r.cours_id = c.cours_id";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, utilisateurId);
+            //stmt.setInt(1, utilisateurId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                String nomCours = rs.getString("nom");
-                String date = rs.getString("date");
-                int coursId = rs.getInt("cours_id");
+                int utilisateurId = rs.getInt("u.id");
+                String utilisateurNom = rs.getString("u.nom");
+                String utilisateurEmail = rs.getString("u.email");
+                String nomCours = rs.getString("cours_nom");
+                String date = rs.getString("r.date");
 
-                reservationsList.add(new Reservation(nomCours, date, coursId));
+                reservationsList.add(new Reservation(nomCours, date, utilisateurId));
             }
         } catch (Exception e) {
             e.printStackTrace();
