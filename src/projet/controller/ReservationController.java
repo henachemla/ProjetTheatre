@@ -58,7 +58,7 @@ public class ReservationController {
             private final Button btn = new Button("🗑");
 
             {
-                btn.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+                btn.setStyle("-fx-background-color: #6a0f1c; -fx-text-fill: white;");
                 btn.setOnAction(e -> {
                     Reservation res = getTableView().getItems().get(getIndex());
                     supprimerReservation(res);

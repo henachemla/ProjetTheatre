@@ -105,6 +105,9 @@ public class navbar {
                 case "Cours":
                 	primaryStage.getScene().setRoot(new CoursView(primaryStage).getView());                	
                 	break;
+                case "Contact":
+                	primaryStage.getScene().setRoot(new ContactView(primaryStage, Utilisateur.getUtilisateurId()).getView());                	
+                	break;
                 case "À propos":
                 	primaryStage.getScene().setRoot(new aPropos(primaryStage).getView());                	
                 	break;

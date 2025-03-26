@@ -63,7 +63,7 @@ public class LoginController {
      // ✅ Bouton Déconnexion
         if (utilisateurId != -1) {
         Button deconnexionButton = new Button("Déconnexion");
-        deconnexionButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+        deconnexionButton.setStyle("-fx-background-color:#6a0f1c; -fx-text-fill: white;");
         deconnexionButton.setOnAction(e -> handleLogout());
         }
         

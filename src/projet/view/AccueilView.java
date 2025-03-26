@@ -3,6 +3,12 @@ package projet.view;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -24,12 +30,22 @@ public class AccueilView {
         root = new BorderPane();
         root.setTop(navbar.createNavBar(primaryStage, "Accueil", utilisateurId));
         root.setStyle("-fx-background-color: #f9f4ed;");
+        
+     // 📸 Appliquer l'image de fond au BorderPane
+        BackgroundImage backgroundImage = new BackgroundImage(
+            new Image(getClass().getResource("/images/jamais.jpg").toExternalForm(), 900, 600, false, true),
+            BackgroundRepeat.NO_REPEAT,
+            BackgroundRepeat.NO_REPEAT,
+            BackgroundPosition.CENTER,
+            new BackgroundSize(100, 100, true, true, false, true)
+        );
+        root.setBackground(new Background(backgroundImage));
 
         // 🎭 Contenu centré
         VBox content = new VBox(30);
         content.setPadding(new Insets(60, 20, 60, 20));
         content.setAlignment(Pos.TOP_CENTER);
-        content.setStyle("-fx-background-color: #f9f4ed;");
+        content.setStyle("-fx-background-color: rgba(255,255,255,0.6);");
 
         // ✨ Titre
         Label titre = new Label("Bienvenue sur notre plateforme de cours de théâtre !");
